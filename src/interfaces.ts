@@ -10,7 +10,7 @@ export interface ReadableSignal<T> extends BaseSignal<T> {
     filter<U extends T>(filter: (payload: T) => payload is U): ReadableSignal<U>;
     filter(filter: (payload: T) => boolean): ReadableSignal<T>;
     map<U>(transform: (payload: T) => U): ReadableSignal<U>;
-    merge<U>(...signals: ReadableSignal<U>[]): ReadableSignal<T|U>;
+    merge<U>(...signals: ReadableSignal<U>[]): ReadableSignal<T | U>;
     promisify(rejectSignal?: ReadableSignal<any>): Promise<T>;
     peek(peekaboo: (payload: T) => void): ReadableSignal<T>;
     readOnly(): ReadableSignal<T>;
@@ -31,10 +31,10 @@ export interface Cache<T> {
     forEach(callback: (payload: T) => void): void;
 }
 
-export type Accumulator<T, U> = (accum: U, current: T) => any;
+export type Accumulator<T, U> = (accumulator: U, current: T) => any;
 
-export type PayloadOf<S extends BaseSignal<any>> =
-    S extends BaseSignal<infer T> ? T : never;
+export type PayloadOf<S extends BaseSignal<any>> = S extends BaseSignal<infer T> ? T : never;
 
-export type ReadOnlyVersionOf<S extends BaseSignal<any>> =
-    S extends BaseSignal<infer T> ? ReadableSignal<T> : never;
+export type ReadOnlyVersionOf<S extends BaseSignal<any>> = S extends BaseSignal<infer T>
+    ? ReadableSignal<T>
+    : never;

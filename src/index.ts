@@ -1,5 +1,5 @@
-export * from './interfaces';
+export * from './interfaces.js';
 
-export {Signal} from './signal';
-export {ExtendedSignal} from './extended-signal';
-export {ValueCache, CollectionCache} from './caches';
+export { Signal } from './signal.js';
+export { ExtendedSignal } from './extended-signal.js';
+export { ValueCache, CollectionCache } from './caches.js';
