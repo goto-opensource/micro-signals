@@ -1,16 +1,22 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
+        "module": "esnext",
         "declaration": true,
-        "target": "es5",
-        "lib": ["es5", "es2015.collection", "es2015.promise"],
+        "target": "esnext",
+        "lib": ["esnext"],
         "outDir": "lib",
         "moduleResolution": "node",
         "noImplicitAny": true,
-        "sourceMap": false,
+        "sourceMap": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
-        "strictNullChecks": true
+        "strictNullChecks": true,
+        "strict": true,
+        "skipLibCheck": true,
+        "incremental": true,
+        "composite": true,
+        "noFallthroughCasesInSwitch": true,
+        "disableSourceOfProjectReferenceRedirect": true
     },
     "include": [
         "src",

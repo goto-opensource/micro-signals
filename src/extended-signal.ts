@@ -3,9 +3,7 @@ import { Accumulator, BaseSignal, Cache, Listener, ReadableSignal } from './inte
 import { TagMap } from './tag-map.js';
 
 export class ExtendedSignal<T> implements ReadableSignal<T> {
-    private _tagMap = new TagMap();
-
-    constructor(private _baseSignal: BaseSignal<T>) {}
+    private _tagMap = new TagMap<T>();
 
     public static merge<U>(...signals: BaseSignal<U>[]): ReadableSignal<U> {
         const listeners = new Map<any, any>();
@@ -51,6 +49,8 @@ export class ExtendedSignal<T> implements ReadableSignal<T> {
             }
         });
     }
+
+    constructor(private _baseSignal: BaseSignal<T>) {}
 
     public add(listener: Listener<T>, ...tags: any[]): void {
         this._tagMap.setListeners(listener, ...tags);

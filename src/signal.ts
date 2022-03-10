@@ -5,6 +5,14 @@ import { Listener, WritableSignal } from './interfaces.js';
 export class Signal<T> extends ExtendedSignal<T> implements WritableSignal<T>, ReadableSignal<T> {
     protected _listeners = new Set<Listener<T>>();
 
+    public static setDefaultListener(listener: Listener<any>) {
+        Signal._staticDefaultListener = listener;
+    }
+
+    private static _staticDefaultListener: Listener<any> = () => {
+        // default static listener is a noop
+    };
+
     constructor() {
         super({
             add: (listener) => {
@@ -15,14 +23,6 @@ export class Signal<T> extends ExtendedSignal<T> implements WritableSignal<T>, R
             },
         });
     }
-
-    public static setDefaultListener(listener: Listener<any>) {
-        Signal._staticDefaultListener = listener;
-    }
-
-    private static _staticDefaultListener: Listener<any> = () => {
-        // default static listener is a noop
-    };
 
     public dispatch(payload: T): void {
         if (this._listeners.size === 0) {
