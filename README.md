@@ -4,7 +4,7 @@ A rather tiny typed messaging system based on [micro-signals](https://github.com
 
 ## About
 
-@goto/micro-signals is a fork of the excellent `micro-signals`, developed further.
+`@goto/micro-signals` is a fork of the excellent `micro-signals`, developed further.
 
 ## Signal
 
@@ -17,7 +17,7 @@ matching method on the base Signal.
 ### Basic Usage of a Signal
 
 ```ts
-import {Signal} from 'micro-signals';
+import {Signal} from '@goto/micro-signals';
 import * as assert from 'assert';
 
 const signal = new Signal<string>();
@@ -49,7 +49,7 @@ in some cases. However, this interface does not provide the full convenience of 
 are any ideas on improvements in this area, suggestions are welcome.
 
 ```ts
-import {Signal} from 'micro-signals';
+import {Signal} from '@goto/micro-signals';
 import * as assert from 'assert';
 
 class TestConsumer {
@@ -77,7 +77,7 @@ assert.deepEqual(testConsumer.receivedPayloads, [1]);
 ### Using the Extended Signal Interface
 
 ```ts
-import {Signal} from 'micro-signals';
+import {Signal} from '@goto/micro-signals';
 import * as assert from 'assert';
 
 const signal = new Signal<string>();
@@ -110,7 +110,7 @@ all of the provided signals to the returned signal. This allow multiplexing of S
 the behavior of the Signal.merge instance method.
 
 ```ts
-import {Signal} from 'micro-signals';
+import {Signal} from '@goto/micro-signals';
 import * as assert from 'assert';
 
 const signal1 = new Signal<string>();
@@ -139,7 +139,7 @@ optional rejection signal. When the rejection signal is dispatched the promise w
 the dispatched value. This matches the behavior of the Signal.promisify instance method.
 
 ```ts
-import {Signal} from 'micro-signals';
+import {Signal} from '@goto/micro-signals';
 
 const successSignal = new Signal<void>();
 const failureSignal = new Signal<void>();
@@ -166,7 +166,7 @@ ValueCache replays the most recent value (similar to memorize in js-signals) and
 replays all dispatched values.
 
 ```ts
-import {Signal, ValueCache, CollectionCache} from 'micro-signals';
+import {Signal, ValueCache, CollectionCache} from '@goto/micro-signals';
 import * as assert from 'assert';
 
 const signal = new Signal<string>();
@@ -192,7 +192,7 @@ the potential to leak attached listeners. In practice this may not be an issue f
 Many use cases may have the base signal and the cached signal on the same object. For example:
 
 ```ts
-import {Signal, ValueCache} from 'micro-signals';
+import {Signal, ValueCache} from '@goto/micro-signals';
 import * as assert from 'assert';
 
 class ToggleState {
@@ -225,7 +225,7 @@ publicly expose a signal while indicating that consumers of the signal should no
 signal.
 
 ```ts
-import {Signal} from 'micro-signals';
+import {Signal} from '@goto/micro-signals';
 import * as assert from 'assert';
 
 const signal = new Signal<string>();
@@ -250,7 +250,7 @@ Signal.filter provides the ability to filter values coming through a Signal, sim
 array in JavaScript.
 
 ```ts
-import {Signal} from 'micro-signals';
+import {Signal} from '@goto/micro-signals';
 import * as assert from 'assert';
 
 const signal = new Signal<number>();
@@ -270,7 +270,7 @@ assert.deepEqual(received, [0, 6, 8, 0]);
 Signal.filter also returns a signal of the correct type when filtering using a type predicate.
 
 ```ts
-import {Signal} from 'micro-signals';
+import {Signal} from '@goto/micro-signals';
 import * as assert from 'assert';
 
 const signal = new Signal<string | null>();
@@ -294,7 +294,7 @@ Signal.map provides the ability to transform payloads coming through a Signal, s
 array in JavaScript.
 
 ```ts
-import {Signal} from 'micro-signals';
+import {Signal} from '@goto/micro-signals';
 import * as assert from 'assert';
 
 const signal = new Signal<string>();
@@ -316,7 +316,7 @@ assert.deepEqual(received, ['cat!', 'dog!', 'frog!', 'sloth!']);
 Peek allows you to access a payload without consuming it. 
 
 ```ts
-import {Signal} from 'micro-signals';
+import {Signal} from '@goto/micro-signals';
 import * as assert from 'assert';
 
 const signal = new Signal<string>();
@@ -340,7 +340,7 @@ assert.deepEqual(received, ['cat!', 'dog!', 'frog!', 'sloth!']);
 Signal.reduce provides the ability to aggregate payloads coming through a Signal, similar to reducing an array in JavaScript.
 
 ```ts
-import {Signal} from 'micro-signals';
+import {Signal} from '@goto/micro-signals';
 import * as assert from 'assert';
 
 const signal = new Signal<number>();
@@ -364,7 +364,7 @@ all of the provided signals and the base signal. This allow multiplexing of Sign
 merges the provided signals with the base signal.
 
 ```ts
-import {Signal} from 'micro-signals';
+import {Signal} from '@goto/micro-signals';
 import * as assert from 'assert';
 
 const signal1 = new Signal<string>();
@@ -393,7 +393,7 @@ optional rejection signal. When the rejection signal is dispatched the promise w
 the dispatched value.
 
 ```ts
-import {Signal} from 'micro-signals';
+import {Signal} from '@goto/micro-signals';
 
 const successSignal = new Signal<void>();
 const failureSignal = new Signal<void>();
@@ -415,7 +415,7 @@ Signal interface without having to expose the add method anywhere.
 Compare the following code examples:
 
 ```ts
-import {ExtendedSignal} from 'micro-signals';
+import {ExtendedSignal} from '@goto/micro-signals';
 import EventEmitter = require('events');
 import * as assert from 'assert';
 
@@ -441,7 +441,7 @@ assert.deepEqual(received, [2, 3]);
 ```
 
 ```ts
-import {Signal} from 'micro-signals';
+import {Signal} from '@goto/micro-signals';
 import EventEmitter = require('events');
 import * as assert from 'assert';
 
@@ -487,7 +487,7 @@ specific signal instance is dispatched with no listeners present.
 
 
 ```ts
-import {Signal} from 'micro-signals';
+import {Signal} from '@goto/micro-signals';
 import * as assert from 'assert';
 
 // static default listener
@@ -524,7 +524,7 @@ Several interfaces are exported as well for convenience:
 -   WritableSignal only defines the dispatch method.
 
 ```ts
-import {Signal, Listener, ReadableSignal, WritableSignal} from 'micro-signals';
+import {Signal, Listener, ReadableSignal, WritableSignal} from '@goto/micro-signals';
 
 const listener: Listener<string> = payload => console.log(payload);
 
