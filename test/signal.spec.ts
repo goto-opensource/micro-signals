@@ -1,66 +1,42 @@
-import test = require('tape');
+import test from 'tape';
 
-import {
-    ReadableSignal,
-    Signal,
-} from '../src';
+import { ReadableSignal, Signal } from '../src/index.js';
 
-import {filteredSuite} from './suites/filtered-suite';
-import {mappedSuite} from './suites/mapped-suite';
-import {mergedSuite} from './suites/merged-suite';
-import {peekedSuite} from './suites/peeked-suite';
-import {promisifySuite} from './suites/promisify-suite';
-import {readOnlySuite} from './suites/read-only-suite';
-import {reducedSuite} from './suites/reduced-suite';
+import { filteredSuite } from './suites/filtered-suite.js';
+import { mappedSuite } from './suites/mapped-suite.js';
+import { mergedSuite } from './suites/merged-suite.js';
+import { peekedSuite } from './suites/peeked-suite.js';
+import { promisifySuite } from './suites/promisify-suite.js';
+import { readOnlySuite } from './suites/read-only-suite.js';
+import { reducedSuite } from './suites/reduced-suite.js';
 
 // TODO run the signal suite on the converted signals as well?
 
-filteredSuite(
-    'Signal#filter',
-    (baseSignal, filter) => baseSignal.filter(filter),
+filteredSuite('Signal#filter', (baseSignal, filter) => baseSignal.filter(filter));
+
+mappedSuite('Signal#map', (baseSignal, transform) => baseSignal.map(transform));
+
+mergedSuite('Signal#merge', (baseSignal, ...signals) => baseSignal.merge(...signals));
+
+mergedSuite('Signal.merge', (baseSignal, ...signals) => Signal.merge(baseSignal, ...signals));
+
+promisifySuite('Signal#promisify', (resolveSignal, rejectSignal?) =>
+    resolveSignal.promisify(rejectSignal)
 );
 
-mappedSuite(
-    'Signal#map',
-    (baseSignal, transform) => baseSignal.map(transform),
+promisifySuite('Signal.promisify', (resolveSignal, rejectSignal?) =>
+    Signal.promisify(resolveSignal, rejectSignal)
 );
 
-mergedSuite(
-    'Signal#merge',
-    (baseSignal, ...signals) => baseSignal.merge(...signals),
+readOnlySuite('Signal#readOnly', (signal) => signal.readOnly());
+
+reducedSuite('Signal#reduce', (baseSignal, accumulator, initialValue) =>
+    baseSignal.reduce(accumulator, initialValue)
 );
 
-mergedSuite(
-    'Signal.merge',
-    (baseSignal, ...signals) => Signal.merge(baseSignal, ...signals),
-);
+peekedSuite('Signal#peek', (baseSignal, peeker) => baseSignal.peek(peeker));
 
-promisifySuite(
-    'Signal#promisify',
-    (resolveSignal, rejectSignal?) => resolveSignal.promisify(rejectSignal),
-);
-
-promisifySuite(
-    'Signal.promisify',
-    (resolveSignal, rejectSignal?) => Signal.promisify(resolveSignal, rejectSignal),
-);
-
-readOnlySuite(
-    'Signal#readOnly',
-    signal => signal.readOnly(),
-);
-
-reducedSuite(
-    'Signal#reduce',
-    (baseSignal, accumulator, initialValue) => baseSignal.reduce(accumulator, initialValue),
-);
-
-peekedSuite(
-    'Signal#peek',
-    (baseSignal, peeker) => baseSignal.peek(peeker),
-);
-
-test('Signal listeners should received dispatched payloads', t => {
+test('Signal listeners should received dispatched payloads', (t) => {
     const signal = new Signal<string>();
 
     const sentPayloads = ['a', 'b', 'c'];
@@ -70,7 +46,7 @@ test('Signal listeners should received dispatched payloads', t => {
 
     signal.add((payload: string) => receivedPayloadsListener1.push(payload));
     signal.add((payload: string) => receivedPayloadsListener2.push(payload));
-    sentPayloads.forEach(payload => signal.dispatch(payload));
+    sentPayloads.forEach((payload) => signal.dispatch(payload));
 
     t.deepEqual(receivedPayloadsListener1, sentPayloads);
     t.deepEqual(receivedPayloadsListener2, sentPayloads);
@@ -78,7 +54,7 @@ test('Signal listeners should received dispatched payloads', t => {
     t.end();
 });
 
-test('Signal listener should be called only once when using addOnce', t => {
+test('Signal listener should be called only once when using addOnce', (t) => {
     const signal = new Signal<void>();
     let callCount = 0;
 
@@ -93,7 +69,7 @@ test('Signal listener should be called only once when using addOnce', t => {
     t.end();
 });
 
-test('Signal listener should only be added once when using addOnce to match behavior of add', t => {
+test('Signal listener should only be added once when using addOnce to match behavior of add', (t) => {
     const signal = new Signal<void>();
     let callCount = 0;
 
@@ -113,7 +89,7 @@ test('Signal listener should only be added once when using addOnce to match beha
  * This tests the type of the filter function exclusively. There is no runtime assertion in this
  * test, but this test will fail the TypeScript typechecker if we have broken this functionality.
  */
-test('Signal.filter types should allow for filtering using type predicates correctly', t => {
+test('Signal.filter types should allow for filtering using type predicates correctly', (t) => {
     function isString(x: any): x is string {
         return typeof x === 'string';
     }
@@ -124,13 +100,13 @@ test('Signal.filter types should allow for filtering using type predicates corre
     const filteredSignal = signal.filter(isString);
     const filteredReadableSignal = readableSignal.filter(isString);
 
-    filteredSignal.add(s => s.length);
-    filteredReadableSignal.add(s => s.length);
+    filteredSignal.add((s) => s.length);
+    filteredReadableSignal.add((s) => s.length);
 
     t.end();
 });
 
-test('Signal removing a one time listener should prevent it from being called ', t => {
+test('Signal removing a one time listener should prevent it from being called ', (t) => {
     const receivedPayloads: string[] = [];
 
     const signal = new Signal<string>();
@@ -146,7 +122,7 @@ test('Signal removing a one time listener should prevent it from being called ',
     t.end();
 });
 
-test('Signal removing a listener should stop further updates', t => {
+test('Signal removing a listener should stop further updates', (t) => {
     const receivedPayloadsListener1: string[] = [];
     const receivedPayloadsListener2: string[] = [];
     const receivedPayloadsListener3: string[] = [];
@@ -174,7 +150,7 @@ test('Signal removing a listener should stop further updates', t => {
     t.end();
 });
 
-test('Signal methods should be chainable', t => {
+test('Signal methods should be chainable', (t) => {
     const s1 = new Signal<number>();
     const s2 = new Signal<string>();
 
@@ -182,13 +158,13 @@ test('Signal methods should be chainable', t => {
     const addOncePayloads: string[] = [];
 
     const s3 = s1
-        .filter(x => x < 10)
-        .map(x => `a${x}`)
+        .filter((x) => x < 10)
+        .map((x) => `a${x}`)
         .merge(s2)
         .readOnly();
 
-    s3.add(payload => addPayloads.push(payload));
-    s3.addOnce(payload => addOncePayloads.push(payload));
+    s3.add((payload) => addPayloads.push(payload));
+    s3.addOnce((payload) => addOncePayloads.push(payload));
 
     s1.dispatch(1);
     s1.dispatch(15);
@@ -201,7 +177,7 @@ test('Signal methods should be chainable', t => {
     t.end();
 });
 
-test('addOnce should the same as add when adding a listener multiple times', t => {
+test('addOnce should the same as add when adding a listener multiple times', (t) => {
     const s1 = new Signal<number>();
 
     const payloads: number[] = [];
@@ -220,7 +196,7 @@ test('addOnce should the same as add when adding a listener multiple times', t =
     t.end();
 });
 
-test('dispatches to static default listener if no instance default listener is set', t => {
+test('dispatches to static default listener if no instance default listener is set', (t) => {
     const staticCalls: any[][] = [];
     const staticDefaultListener = (...args: any[]) => staticCalls.push(args);
     Signal.setDefaultListener(staticDefaultListener);
@@ -230,7 +206,7 @@ test('dispatches to static default listener if no instance default listener is s
     t.end();
 });
 
-test('dispatches to instance default listener when it is set', t => {
+test('dispatches to instance default listener when it is set', (t) => {
     const staticCalls: any[][] = [];
     const instanceCalls: any[][] = [];
     const staticDefaultListener = (...args: any[]) => staticCalls.push(args);
@@ -244,7 +220,7 @@ test('dispatches to instance default listener when it is set', t => {
     t.end();
 });
 
-test('does not dispatch to static default listener when other listeners have been added', t => {
+test('does not dispatch to static default listener when other listeners have been added', (t) => {
     const staticCalls: number[] = [];
     const staticDefaultListener = (payload: number) => staticCalls.push(payload);
     Signal.setDefaultListener(staticDefaultListener);
@@ -259,7 +235,7 @@ test('does not dispatch to static default listener when other listeners have bee
     t.end();
 });
 
-test('does not dispatch to static default listener when other listeners have been added', t => {
+test('does not dispatch to static default listener when other listeners have been added', (t) => {
     const instanceCalls: number[] = [];
     const instanceDefaultListener = (payload: number) => instanceCalls.push(payload);
     const s = new Signal<number>();

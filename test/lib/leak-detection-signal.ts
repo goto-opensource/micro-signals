@@ -6,7 +6,7 @@
 
 import {
     Signal as BaseSignal,
-} from '../../src';
+} from '../../src/index.js';
 
 export class LeakDetectionSignal<T> extends BaseSignal<T> {
     get listenerCount(): number {

@@ -1,12 +1,14 @@
-import test = require('tape');
-import {Accumulator, ReadableSignal, Signal} from '../../src';
-import {LeakDetectionSignal} from '../lib/leak-detection-signal';
-import {parentChildSuite} from './parent-child-suite';
+import test from 'tape';
+
+import { Accumulator, ReadableSignal, Signal } from '../../src/index.js';
+import { LeakDetectionSignal } from '../lib/leak-detection-signal.js';
+
+import { parentChildSuite } from './parent-child-suite.js';
 
 export type ReducedSignalCreationFunction = <T, U>(
     baseSignal: ReadableSignal<T>,
     accumulator: Accumulator<T, U>,
-    initialValue: U,
+    initialValue: U
 ) => ReadableSignal<U>;
 
 export function reducedSuite(prefix: string, createReducedSignal: ReducedSignalCreationFunction) {
@@ -16,7 +18,7 @@ export function reducedSuite(prefix: string, createReducedSignal: ReducedSignalC
         return { parentSignal, childSignal };
     });
 
-    test(`${prefix} should dispatch with the accumulated payload`, t => {
+    test(`${prefix} should dispatch with the accumulated payload`, (t) => {
         const baseSignal = new Signal<number>();
 
         const reducedSignal = baseSignal.reduce((accum, curr) => accum + curr, 5);
@@ -24,8 +26,8 @@ export function reducedSuite(prefix: string, createReducedSignal: ReducedSignalC
         const addResults: number[] = [];
         const addOnceResults: number[] = [];
 
-        reducedSignal.add(x => addResults.push(x));
-        reducedSignal.addOnce(x => addOnceResults.push(x));
+        reducedSignal.add((x) => addResults.push(x));
+        reducedSignal.addOnce((x) => addOnceResults.push(x));
 
         baseSignal.dispatch(50);
         baseSignal.dispatch(0);
@@ -37,11 +39,13 @@ export function reducedSuite(prefix: string, createReducedSignal: ReducedSignalC
         t.end();
     });
 
-    test('ReducedSignal should not leak', t => {
+    test('ReducedSignal should not leak', (t) => {
         const signal = new LeakDetectionSignal<void>();
         const mappedSignal = createReducedSignal(signal, () => true, false);
 
-        const listener = () => { /* empty listener */ };
+        const listener = () => {
+            /* empty listener */
+        };
         mappedSignal.add(listener);
         signal.dispatch(undefined);
         mappedSignal.remove(listener);

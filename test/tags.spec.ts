@@ -1,17 +1,15 @@
-import test = require('tape');
+import test from 'tape';
 
-import {
-    Signal,
-} from '../src';
+import { Signal } from '../src/index.js';
 
-test('Signal removing an added listener by tags should work after a dispatch', t => {
+test('Signal removing an added listener by tags should work after a dispatch', (t) => {
     const receivedPayloads: string[] = [];
 
     const signal = new Signal<string>();
 
     const tag = {};
 
-    signal.add(payload => receivedPayloads.push(payload), tag);
+    signal.add((payload) => receivedPayloads.push(payload), tag);
 
     signal.dispatch('a');
     signal.remove(tag);
@@ -22,14 +20,14 @@ test('Signal removing an added listener by tags should work after a dispatch', t
     t.end();
 });
 
-test('Signal removing an added listener by tags should work before any dispatches', t => {
+test('Signal removing an added listener by tags should work before any dispatches', (t) => {
     const receivedPayloads: string[] = [];
 
     const signal = new Signal<string>();
 
     const tag = {};
 
-    signal.add(payload => receivedPayloads.push(payload), tag);
+    signal.add((payload) => receivedPayloads.push(payload), tag);
 
     signal.remove(tag);
     signal.dispatch('a');
@@ -40,14 +38,14 @@ test('Signal removing an added listener by tags should work before any dispatche
     t.end();
 });
 
-test('Signal removing an added once listener by tags should stop further updates', t => {
+test('Signal removing an added once listener by tags should stop further updates', (t) => {
     const receivedPayloads: string[] = [];
 
     const signal = new Signal<string>();
 
     const tag = {};
 
-    signal.addOnce(payload => receivedPayloads.push(payload), tag);
+    signal.addOnce((payload) => receivedPayloads.push(payload), tag);
 
     signal.remove(tag);
     signal.dispatch('a');
@@ -58,7 +56,7 @@ test('Signal removing an added once listener by tags should stop further updates
     t.end();
 });
 
-test('Signal should support multiple tags per added listener', t => {
+test('Signal should support multiple tags per added listener', (t) => {
     const receivedPayloads: string[] = [];
 
     const signal = new Signal<string>();
@@ -67,7 +65,7 @@ test('Signal should support multiple tags per added listener', t => {
     const tag2 = {};
     const tag3 = {};
 
-    signal.add(payload => receivedPayloads.push(payload), tag1, tag2, tag3);
+    signal.add((payload) => receivedPayloads.push(payload), tag1, tag2, tag3);
 
     signal.dispatch('a');
     signal.remove(tag3);
@@ -78,7 +76,7 @@ test('Signal should support multiple tags per added listener', t => {
     t.end();
 });
 
-test('Signal should support multiple listener per tag', t => {
+test('Signal should support multiple listener per tag', (t) => {
     const receivedPayloads1: string[] = [];
     const receivedPayloads2: string[] = [];
     const receivedPayloads3: string[] = [];
@@ -88,9 +86,9 @@ test('Signal should support multiple listener per tag', t => {
     const tag1 = {};
     const tag2 = {};
 
-    signal.add(payload => receivedPayloads1.push(payload), tag1, tag2);
-    signal.add(payload => receivedPayloads2.push(payload), tag1);
-    signal.add(payload => receivedPayloads3.push(payload), tag2);
+    signal.add((payload) => receivedPayloads1.push(payload), tag1, tag2);
+    signal.add((payload) => receivedPayloads2.push(payload), tag1);
+    signal.add((payload) => receivedPayloads3.push(payload), tag2);
 
     signal.dispatch('a');
     signal.remove(tag1);
@@ -105,7 +103,7 @@ test('Signal should support multiple listener per tag', t => {
     t.end();
 });
 
-test('Signal after removing a listener by tag the tag no longer apply', t => {
+test('Signal after removing a listener by tag the tag no longer apply', (t) => {
     const receivedPayloads: string[] = [];
 
     const signal = new Signal<string>();
@@ -130,7 +128,7 @@ test('Signal after removing a listener by tag the tag no longer apply', t => {
     t.end();
 });
 
-test('Signal after removing a listener by listener the tag no longer applies', t => {
+test('Signal after removing a listener by listener the tag no longer applies', (t) => {
     const receivedPayloads: string[] = [];
 
     const signal = new Signal<string>();
@@ -155,7 +153,7 @@ test('Signal after removing a listener by listener the tag no longer applies', t
     t.end();
 });
 
-test('Signal after removing a tag the tag should no longer apply to multiple listeners', t => {
+test('Signal after removing a tag the tag should no longer apply to multiple listeners', (t) => {
     const receivedPayloads1: string[] = [];
     const receivedPayloads2: string[] = [];
 
@@ -183,7 +181,7 @@ test('Signal after removing a tag the tag should no longer apply to multiple lis
     t.end();
 });
 
-test('Signal removing a tagged listener should not affect other listeners with the same tag', t => {
+test('Signal removing a tagged listener should not affect other listeners with the same tag', (t) => {
     const receivedPayloads1: string[] = [];
     const receivedPayloads2: string[] = [];
 
@@ -210,7 +208,7 @@ test('Signal removing a tagged listener should not affect other listeners with t
     t.end();
 });
 
-test('Signal listener should be able to add again with the same tag', t => {
+test('Signal listener should be able to add again with the same tag', (t) => {
     const receivedPayloads1: string[] = [];
     const receivedPayloads2: string[] = [];
 

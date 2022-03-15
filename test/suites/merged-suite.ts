@@ -1,9 +1,13 @@
-import test = require('tape');
-import {ReadableSignal, Signal} from '../../src';
-import {LeakDetectionSignal} from '../lib/leak-detection-signal';
-import {parentChildSuite} from './parent-child-suite';
+import test from 'tape';
 
-export type ReadableSignalCreationFunction = <T>(...signals: ReadableSignal<T>[]) => ReadableSignal<T>;
+import { ReadableSignal, Signal } from '../../src/index.js';
+import { LeakDetectionSignal } from '../lib/leak-detection-signal.js';
+
+import { parentChildSuite } from './parent-child-suite.js';
+
+export type ReadableSignalCreationFunction = <T>(
+    ...signals: ReadableSignal<T>[]
+) => ReadableSignal<T>;
 
 export function mergedSuite(prefix: string, createMergedSignal: ReadableSignalCreationFunction) {
     parentChildSuite(prefix, () => {
@@ -12,22 +16,22 @@ export function mergedSuite(prefix: string, createMergedSignal: ReadableSignalCr
         return { parentSignal, childSignal };
     });
 
-    test(`${prefix} should dispatch when any of the provided signals are dispatched`, t => {
+    test(`${prefix} should dispatch when any of the provided signals are dispatched`, (t) => {
         const baseSignalString = new Signal<string>();
         const baseSignalNumber = new Signal<number>();
         const baseSignalBoolean = new Signal<boolean>();
 
-        const mergedSignal = createMergedSignal<string|number|boolean>(
+        const mergedSignal = createMergedSignal<string | number | boolean>(
             baseSignalString,
             baseSignalNumber,
-            baseSignalBoolean,
+            baseSignalBoolean
         );
 
-        const receivedPayloads: (string|number|boolean)[] = [];
-        const receivedPayloadsOnce: (string|number|boolean)[] = [];
+        const receivedPayloads: (string | number | boolean)[] = [];
+        const receivedPayloadsOnce: (string | number | boolean)[] = [];
 
-        mergedSignal.add(payload => receivedPayloads.push(payload));
-        mergedSignal.addOnce(payload => receivedPayloadsOnce.push(payload));
+        mergedSignal.add((payload) => receivedPayloads.push(payload));
+        mergedSignal.addOnce((payload) => receivedPayloadsOnce.push(payload));
 
         baseSignalString.dispatch('a');
         baseSignalNumber.dispatch(0);
@@ -41,12 +45,14 @@ export function mergedSuite(prefix: string, createMergedSignal: ReadableSignalCr
         t.end();
     });
 
-    test('MergedSignal should not leak', t => {
+    test('MergedSignal should not leak', (t) => {
         const signal1 = new LeakDetectionSignal<void>();
         const signal2 = new LeakDetectionSignal<void>();
         const mergedSignal = createMergedSignal(signal1, signal2);
 
-        const listener = () => { /* empty listener */ };
+        const listener = () => {
+            /* empty listener */
+        };
         mergedSignal.add(listener);
         signal1.dispatch(undefined);
         signal2.dispatch(undefined);
@@ -56,5 +62,4 @@ export function mergedSuite(prefix: string, createMergedSignal: ReadableSignalCr
         t.equal(signal2.listenerCount, 0);
         t.end();
     });
-
 }

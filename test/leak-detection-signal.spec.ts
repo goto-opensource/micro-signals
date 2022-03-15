@@ -1,11 +1,13 @@
-import test = require('tape');
+import test from 'tape';
 
-import {LeakDetectionSignal} from './lib/leak-detection-signal';
+import { LeakDetectionSignal } from './lib/leak-detection-signal.js';
 
-test('extended signal should provide correct listener count', t => {
+test('extended signal should provide correct listener count', (t) => {
     const s = new LeakDetectionSignal();
     t.equal(s.listenerCount, 0);
-    const listener = () => { /* empty listener */ };
+    const listener = () => {
+        /* empty listener */
+    };
     s.add(listener);
     t.equal(s.listenerCount, 1);
     s.remove(listener);

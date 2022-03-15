@@ -1,20 +1,25 @@
-import test = require('tape');
+import test from 'tape';
 
-import {LeakDetectionSignal} from '../lib/leak-detection-signal';
-import {parentChildSuite} from './parent-child-suite';
+import { PayloadOf, ReadableSignal, ReadOnlyVersionOf, Signal } from '../../src/index.js';
+import { LeakDetectionSignal } from '../lib/leak-detection-signal.js';
 
-import {PayloadOf, ReadableSignal, ReadOnlyVersionOf, Signal} from '../../src';
+import { parentChildSuite } from './parent-child-suite.js';
 
-export type ReadOnlySignalCreationFunction = <T>(baseSignal: ReadableSignal<T>) => ReadableSignal<T>;
+export type ReadOnlySignalCreationFunction = <T>(
+    baseSignal: ReadableSignal<T>
+) => ReadableSignal<T>;
 
-export function readOnlySuite(prefix: string, createReadOnlySignal: ReadOnlySignalCreationFunction) {
+export function readOnlySuite(
+    prefix: string,
+    createReadOnlySignal: ReadOnlySignalCreationFunction
+) {
     parentChildSuite(prefix, () => {
         const parentSignal = new Signal();
         const childSignal = createReadOnlySignal(parentSignal);
         return { parentSignal, childSignal };
     });
 
-    test(`${prefix} forwards payloads and cannot be dispatched`, t => {
+    test(`${prefix} forwards payloads and cannot be dispatched`, (t) => {
         const signal = new Signal<string>();
 
         signal.dispatch('a');
@@ -49,11 +54,13 @@ export function readOnlySuite(prefix: string, createReadOnlySignal: ReadOnlySign
         t.end();
     });
 
-    test(`${prefix} should not leak`, t => {
+    test(`${prefix} should not leak`, (t) => {
         const signal = new LeakDetectionSignal<void>();
         const readOnlySignal = createReadOnlySignal(signal);
 
-        const listener = () => { /* empty listener */ };
+        const listener = () => {
+            /* empty listener */
+        };
         readOnlySignal.add(listener);
         signal.dispatch(undefined);
         readOnlySignal.remove(listener);
@@ -62,7 +69,7 @@ export function readOnlySuite(prefix: string, createReadOnlySignal: ReadOnlySign
         t.end();
     });
 
-    test(`${prefix} should compile`, t => {
+    test(`${prefix} should compile`, (t) => {
         interface FooBar {
             foo: 'foo';
             bar: 'bar';
@@ -72,12 +79,11 @@ export function readOnlySuite(prefix: string, createReadOnlySignal: ReadOnlySign
 
         const writable = new Signal<FooBar>();
         const readonly: ReadOnlyVersionOf<typeof writable> = writable.readOnly();
-        const payload: PayloadOf<typeof writable> = {foo: 'foo' , bar: 'bar'};
+        const payload: PayloadOf<typeof writable> = { foo: 'foo', bar: 'bar' };
         writable.dispatch(payload);
 
         readonly.add(takesFooBar);
 
         t.end();
     });
-
 }
