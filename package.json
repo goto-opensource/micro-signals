@@ -17,6 +17,7 @@
     "@types/tape": "4.2.30",
     "@typescript-eslint/eslint-plugin": "5.13.0",
     "@typescript-eslint/parser": "5.13.0",
+    "c8": "7.11.0",
     "conventional-changelog-conventionalcommits": "4.6.3",
     "erasmus": "^0.1.0",
     "eslint": "8.10.0",
@@ -33,13 +34,14 @@
     "rimraf": "3.0.2",
     "semantic-release": "19.0.2",
     "semver": "7.3.5",
+    "tap-spec": "5.0.0",
     "tape": "5.5.2",    
     "ts-node": "7.0.1",
     "typescript": "4.5"
   },
   "scripts": {
     "lint": "eslint --ext .ts,.tsx --cache ./src",
-    "test": "yarn build && nyc esm-tape-runner 'lib/test/*.spec.js' | faucet && nyc report",
+    "test": "yarn build && c8 esm-tape-runner 'lib/test/*.spec.js' | tap-spec",
     "clean": "rimraf lib",
     "build": "tsc --project tsconfig.json",
     "prepublishOnly": "yarn && yarn test && yarn build"
