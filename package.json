@@ -42,8 +42,7 @@
     "lint": "eslint --ext .ts,.tsx --cache ./src",
     "test": "yarn build && c8 esm-tape-runner 'lib/test/*.spec.js' | tap-spec",
     "clean": "rimraf lib",
-    "build": "tsc --project tsconfig.json",
-    "prepublishOnly": "yarn && yarn test && yarn build"
+    "build": "tsc --project tsconfig.json"
   },
   "keywords": [
     "signals",
