@@ -170,8 +170,8 @@ import {Signal, ValueCache, CollectionCache} from '@goto/micro-signals';
 import * as assert from 'assert';
 
 const signal = new Signal<string>();
-const valueCached = signal.cache(new ValueCache());
-const collectionCached = signal.cache(new CollectionCache());
+const valueCached = signal.cache(new ValueCache()); // CachedSignal<string, ValueCache<string>>
+const collectionCached = signal.cache(new CollectionCache()); // CachedSignal<string, CollectionCache<string>>
 
 const valueCachedReceived: string[] = [];
 const collectionCachedReceived: string[] = [];

@@ -10,12 +10,14 @@ export abstract class ArrayCache<T> implements Cache<T> {
 }
 
 export class ValueCache<T> extends ArrayCache<T> {
+    public readonly kind = 'valueCache';
     public add(value: T): void {
         this._payloads = [value];
     }
 }
 
 export class CollectionCache<T> extends ArrayCache<T> {
+    public readonly kind = 'collectionCache';
     public add(value: T): void {
         this._payloads.push(value);
     }

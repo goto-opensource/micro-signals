@@ -19,6 +19,26 @@ function testCache<T>(values: ReadonlyArray<T>): Cache<T> {
     };
 }
 
+test('Signal#cache readme', (t) => {
+    const signal = new Signal<string>();
+    const valueCached = signal.cache(new ValueCache());
+    const collectionCached = signal.cache(new CollectionCache());
+
+    const valueCachedReceived: string[] = [];
+    const collectionCachedReceived: string[] = [];
+
+    ['a', 'b', 'c'].forEach((payload) => signal.dispatch(payload));
+
+    valueCached.add((payload) => valueCachedReceived.push(payload));
+    collectionCached.add((payload) => collectionCachedReceived.push(payload));
+
+    ['d', 'e'].forEach((payload) => signal.dispatch(payload));
+
+    t.deepEqual(valueCachedReceived, ['c', 'd', 'e']);
+    t.deepEqual(collectionCachedReceived, ['a', 'b', 'c', 'd', 'e']);
+    t.end();
+});
+
 test('Signal#cache calling dispatch on the source signal calls add on the cache', (t) => {
     const signal = new Signal<number>();
     const receivedPayloads: number[] = [];
@@ -131,7 +151,7 @@ test('Signal#cache adding a FreshListener to a derived signal should NOT receive
 
 test(`Signal#cache subscribers don't get cache after clearing`, (t) => {
     const signal = new Signal<number>();
-    const cached = signal.cache(new CollectionCache());
+    const cached = signal.cache(new CollectionCache<number>());
 
     const dispatchedValues: number[] = [];
     const tooLateSubscriber = (value: number) => dispatchedValues.push(value + 100);
@@ -154,7 +174,7 @@ test(`Signal#cache new caches can be created after clearing`, (t) => {
     signal.clear(); // wiping old cache
 
     const lateSubscriber = (value: number) => dispatchedValues.push(value + 10);
-    const cached = signal.cache(new CollectionCache());
+    const cached = signal.cache(new CollectionCache<number>());
 
     [6, 7, 8, 9, 0].forEach((value) => signal.dispatch(value));
     cached.add(lateSubscriber);

@@ -7,7 +7,7 @@ export function cacheSuite(
     cacheClass: { new <T>(): Cache<T> },
     expected: <T>(testCase: T[]) => T[]
 ) {
-    const cacheName = (cacheClass as any).name;
+    const cacheName = cacheClass.name;
 
     test(`${cacheName} call forEach callback if add has not been called`, (t) => {
         const cache = new cacheClass();
@@ -58,7 +58,7 @@ export function cacheSuite(
     test(`${cacheName} cached signal should not leak`, (t) => {
         const signal = new LeakDetectionSignal<void>();
         t.equal(signal.listenerCount, 0, 'start with 0 listeners');
-        const cachedSignal = signal.cache(new cacheClass());
+        const cachedSignal = signal.cache(new cacheClass<void>());
         t.equal(signal.listenerCount, 1, 'has one listener after caching');
 
         const listener = () => {

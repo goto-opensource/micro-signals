@@ -1,8 +1,10 @@
+import { CollectionCache, ValueCache } from './caches.js';
 import {
     Accumulator,
     BaseSignal,
     // eslint-disable-next-line @typescript-eslint/no-shadow
     Cache,
+    CachedSignal,
     Listener,
     ReadableSignal,
     WritableSignal,
@@ -132,7 +134,9 @@ export class ExtendedSignal<T> implements ReadableSignal<T> {
         );
     }
 
-    public merge<U>(...signals: BaseSignal<U>[]): ReadableSignal<T | U> {
+    public merge<U, C extends Cache<unknown>>(...s: CachedSignal<U, C>[]): CachedSignal<T | U, C>;
+    public merge<U>(...signals: ReadableSignal<U>[]): ReadableSignal<T | U>;
+    public merge<U>(...signals: ReadableSignal<U>[]): ReadableSignal<T | U> {
         return ExtendedSignal.merge<T | U>(this._baseSignal, ...signals);
     }
 
@@ -169,7 +173,10 @@ export class ExtendedSignal<T> implements ReadableSignal<T> {
     /**
      * cached Signals clear will not dispatch cached payloads after being cleared
      */
-    public cache(cache: Cache<T>): ReadableSignal<T> {
+    public cache(cache: ValueCache<T>): CachedSignal<T, ValueCache<T>>;
+    public cache(cache: CollectionCache<T>): CachedSignal<T, CollectionCache<T>>;
+    public cache<NC extends Cache<T>>(cache: NC): CachedSignal<T, NC>;
+    public cache<NC extends Cache<T>>(cache: NC): CachedSignal<T, NC> {
         let alive = true;
         const writeToCache = (payload: T) => cache.add(payload);
         this._baseSignal.add(writeToCache);
@@ -198,12 +205,22 @@ export class ExtendedSignal<T> implements ReadableSignal<T> {
  * Provides a new signal, with its own set of listeners, and the ability to transform listeners that
  * are added to the new signal.
  */
-function convertedListenerSignal<BaseType, ExtendedType>(
-    baseSignal: BaseSignal<BaseType>,
-    convertListener: (listener: Listener<ExtendedType>) => Listener<BaseType>,
-    postAddHook?: (listener: Listener<ExtendedType>, listenerActive: () => boolean) => void
-): ExtendedSignal<ExtendedType> {
-    const listenerMap = new Map<Listener<ExtendedType>, Listener<BaseType>>();
+function convertedListenerSignal<P, T, C extends Cache<T>>(
+    baseSignal: BaseSignal<P>,
+    convertListener: (listener: Listener<T>) => Listener<P>,
+    postAddHook?: (listener: Listener<T>, listenerActive: () => boolean) => void
+): CachedSignal<T, C>;
+function convertedListenerSignal<P, T>(
+    baseSignal: BaseSignal<P>,
+    convertListener: (listener: Listener<T>) => Listener<P>,
+    postAddHook?: (listener: Listener<T>, listenerActive: () => boolean) => void
+): ReadableSignal<T>;
+function convertedListenerSignal<P, T>(
+    baseSignal: BaseSignal<P>,
+    convertListener: (listener: Listener<T>) => Listener<P>,
+    postAddHook?: (listener: Listener<T>, listenerActive: () => boolean) => void
+): ReadableSignal<T> {
+    const listenerMap = new Map<Listener<T>, Listener<P>>();
     return new ExtendedSignal({
         add: (listener) => {
             if (listenerMap.has(listener)) {
