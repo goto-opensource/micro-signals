@@ -10,6 +10,18 @@ import {
 import { Signal } from './signal.js';
 import { TagMap } from './tag-map.js';
 
+const FreshMarker = Symbol('so fresh');
+type FreshListener<T> = Listener<T> & { fresh: typeof FreshMarker };
+
+function isFreshListener<T>(listener: any): listener is FreshListener<T> {
+    return 'fresh' in listener && listener.fresh === FreshMarker;
+}
+function makeFreshListener<T>(listener: Listener<T>): FreshListener<T> {
+    return Object.assign((payload: T) => listener(payload), {
+        fresh: FreshMarker,
+    }) as any;
+}
+
 export class ExtendedSignal<T> implements ReadableSignal<T> {
     private _tagMap = new TagMap<T>();
     protected _postClearHooks: Function[] = [];
@@ -98,6 +110,11 @@ export class ExtendedSignal<T> implements ReadableSignal<T> {
         this._baseSignal.add(oneTimeListener);
     }
 
+    public addFresh(listener: Listener<T>, ...tags: any[]): void {
+        const freshListener = makeFreshListener((payload: T) => listener(payload));
+        this._baseSignal.add(freshListener, ...tags);
+    }
+
     public filter<U extends T>(filter: (payload: T) => payload is U): ReadableSignal<U>;
     public filter(filter: (payload: T) => boolean): ReadableSignal<T>;
     public filter(filter: (payload: T) => boolean): ReadableSignal<T> {
@@ -165,11 +182,13 @@ export class ExtendedSignal<T> implements ReadableSignal<T> {
             this._baseSignal,
             (listener) => (payload) => listener(payload),
             (listener, listenerActive) => {
-                cache.forEach((payload) => {
-                    if (alive && listenerActive()) {
-                        listener(payload);
-                    }
-                });
+                if (!isFreshListener(listener)) {
+                    cache.forEach((payload) => {
+                        if (alive && listenerActive()) {
+                            listener(payload);
+                        }
+                    });
+                }
             }
         );
     }
@@ -187,7 +206,9 @@ function convertedListenerSignal<BaseType, ExtendedType>(
     const listenerMap = new Map<Listener<ExtendedType>, Listener<BaseType>>();
     return new ExtendedSignal({
         add: (listener) => {
-            const newListener = convertListener(listener);
+            const newListener = isFreshListener(listener)
+                ? makeFreshListener(convertListener(listener))
+                : convertListener(listener);
             listenerMap.set(listener, newListener);
             baseSignal.add(newListener);
             if (postAddHook) {

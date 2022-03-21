@@ -95,7 +95,7 @@ test('Signal#cache should provide a signal that allows removing during cache rep
     t.end();
 });
 
-test('Signal#cached adding a listener to a derived signal should receive the cache', (t) => {
+test('Signal#cache adding a listener to a derived signal should receive the cache', (t) => {
     const signal = new Signal<number>();
     const receivedPayloads: string[] = [];
 
@@ -109,7 +109,27 @@ test('Signal#cached adding a listener to a derived signal should receive the cac
     t.end();
 });
 
-test(`Signal#cached subscribers don't get cache after clearing`, (t) => {
+test('Signal#cache adding a FreshListener to a derived signal should NOT receive the cache', (t) => {
+    const signal = new Signal<number>();
+    const receivedPayloads: string[] = [];
+
+    const cachedSignal = signal.cache(testCache([1, 2, 3]));
+
+    const mappedSignal = cachedSignal.map((x) => x.toString(10));
+    const filteredSignal = mappedSignal.filter((_x) => true);
+    const peekedSignal = filteredSignal.peek((x) => void x);
+
+    mappedSignal.addFresh((payload) => receivedPayloads.push(payload));
+    filteredSignal.addFresh((payload) => receivedPayloads.push(payload));
+    peekedSignal.addFresh((payload) => receivedPayloads.push(payload));
+
+    t.deepEqual(receivedPayloads, [], 'did not receive anything');
+    signal.dispatch(42);
+    t.deepEqual(receivedPayloads, ['42', '42', '42'], 'received new values');
+    t.end();
+});
+
+test(`Signal#cache subscribers don't get cache after clearing`, (t) => {
     const signal = new Signal<number>();
     const cached = signal.cache(new CollectionCache());
 
@@ -126,7 +146,7 @@ test(`Signal#cached subscribers don't get cache after clearing`, (t) => {
     t.end();
 });
 
-test(`Signal#cached new caches can be created after clearing`, (t) => {
+test(`Signal#cache new caches can be created after clearing`, (t) => {
     const signal = new Signal<number>();
 
     const dispatchedValues: number[] = [];
