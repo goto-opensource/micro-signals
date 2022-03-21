@@ -38,6 +38,11 @@ export class Signal<T> extends ExtendedSignal<T> implements WritableSignal<T>, R
         this._instanceDefaultListener = listener;
     }
 
+    public clear() {
+        this._listeners = new Set();
+        this._postClearHooks.forEach((hook) => hook());
+    }
+
     private _instanceDefaultListener: Listener<T> = (payload) =>
         Signal._staticDefaultListener(payload);
 }

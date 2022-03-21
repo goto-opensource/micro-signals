@@ -1,5 +1,6 @@
 import test from 'tape';
 
+// eslint-disable-next-line @typescript-eslint/no-shadow
 import { Cache, CollectionCache, Signal, ValueCache } from '../src/index.js';
 
 import { cacheSuite } from './suites/cache-suite.js';
@@ -105,6 +106,40 @@ test('Signal#cached adding a listener to a derived signal should receive the cac
     mappedSignal.add((payload) => receivedPayloads.push(payload));
 
     t.deepEqual(receivedPayloads, ['1', '2', '3']);
+    t.end();
+});
+
+test(`Signal#cached subscribers don't get cache after clearing`, (t) => {
+    const signal = new Signal<number>();
+    const cached = signal.cache(new CollectionCache());
+
+    const dispatchedValues: number[] = [];
+    const tooLateSubscriber = (value: number) => dispatchedValues.push(value + 100);
+
+    [1, 2, 3, 4, 5].forEach((value) => signal.dispatch(value));
+
+    signal.clear();
+
+    cached.add(tooLateSubscriber);
+
+    t.deepEqual(dispatchedValues, []);
+    t.end();
+});
+
+test(`Signal#cached new caches can be created after clearing`, (t) => {
+    const signal = new Signal<number>();
+
+    const dispatchedValues: number[] = [];
+
+    signal.clear(); // wiping old cache
+
+    const lateSubscriber = (value: number) => dispatchedValues.push(value + 10);
+    const cached = signal.cache(new CollectionCache());
+
+    [6, 7, 8, 9, 0].forEach((value) => signal.dispatch(value));
+    cached.add(lateSubscriber);
+
+    t.deepEqual(dispatchedValues, [16, 17, 18, 19, 10]);
     t.end();
 });
 

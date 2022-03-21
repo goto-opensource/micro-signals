@@ -2,6 +2,7 @@ import test from 'tape';
 
 import { ReadableSignal, Signal } from '../src/index.js';
 
+import { derivedSuite } from './suites/derived-suite.js';
 import { filteredSuite } from './suites/filtered-suite.js';
 import { mappedSuite } from './suites/mapped-suite.js';
 import { mergedSuite } from './suites/merged-suite.js';
@@ -11,6 +12,12 @@ import { readOnlySuite } from './suites/read-only-suite.js';
 import { reducedSuite } from './suites/reduced-suite.js';
 
 // TODO run the signal suite on the converted signals as well?
+
+derivedSuite('derived Signal (filter)', (baseSignal) => baseSignal.filter((_x) => true));
+derivedSuite('derived Signal (map)', (baseSignal) => baseSignal.map((x) => x));
+derivedSuite('derived Signal (peek)', (baseSignal) => baseSignal.peek((x) => x));
+derivedSuite('derived Signal (readonly)', (baseSignal) => baseSignal.readOnly());
+// cannot turn this on for cached, because they always leak
 
 filteredSuite('Signal#filter', (baseSignal, filter) => baseSignal.filter(filter));
 

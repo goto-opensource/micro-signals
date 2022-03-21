@@ -1,9 +1,18 @@
-// eslint-disable-next-line @typescript-eslint/no-shadow
-import { Accumulator, BaseSignal, Cache, Listener, ReadableSignal } from './interfaces.js';
+import {
+    Accumulator,
+    BaseSignal,
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    Cache,
+    Listener,
+    ReadableSignal,
+    WritableSignal,
+} from './interfaces.js';
+import { Signal } from './signal.js';
 import { TagMap } from './tag-map.js';
 
 export class ExtendedSignal<T> implements ReadableSignal<T> {
     private _tagMap = new TagMap<T>();
+    protected _postClearHooks: Function[] = [];
 
     public static merge<U>(...signals: BaseSignal<U>[]): ReadableSignal<U> {
         const listeners = new Map<any, any>();
@@ -50,7 +59,7 @@ export class ExtendedSignal<T> implements ReadableSignal<T> {
         });
     }
 
-    constructor(private _baseSignal: BaseSignal<T>) {}
+    constructor(private readonly _baseSignal: BaseSignal<T>) {}
 
     public add(listener: Listener<T>, ...tags: any[]): void {
         this._tagMap.setListeners(listener, ...tags);
@@ -66,6 +75,14 @@ export class ExtendedSignal<T> implements ReadableSignal<T> {
         this._tagMap.clearListener(listenerOrTag);
     }
 
+    public chain(
+        child?: ReadableSignal<any> & WritableSignal<any>
+    ): ReadableSignal<T> & WritableSignal<T> {
+        const newChild = child ?? new Signal<T>();
+        this.add((payload) => newChild.dispatch(payload), child);
+        return newChild;
+    }
+
     public addOnce(listener: Listener<T>, ...tags: any[]): void {
         // to match the set behavior of add, only add the listener if the listener is not already
         // registered, don't add the same listener twice
@@ -74,6 +91,7 @@ export class ExtendedSignal<T> implements ReadableSignal<T> {
         }
         const oneTimeListener = (payload: T) => {
             this._baseSignal.remove(oneTimeListener);
+            this._tagMap.clearListener(oneTimeListener);
             listener(payload);
         };
         this._tagMap.setListeners(oneTimeListener, listener, ...tags);
@@ -131,15 +149,24 @@ export class ExtendedSignal<T> implements ReadableSignal<T> {
         });
     }
 
+    /**
+     * cached Signals clear will not dispatch cached payloads after being cleared
+     */
     public cache(cache: Cache<T>): ReadableSignal<T> {
-        this._baseSignal.add((payload) => cache.add(payload));
+        let alive = true;
+        const writeToCache = (payload: T) => cache.add(payload);
+        this._baseSignal.add(writeToCache);
+        this._postClearHooks.push(() => {
+            alive = false;
+            this._baseSignal.remove(writeToCache);
+        });
 
         return convertedListenerSignal(
             this._baseSignal,
             (listener) => (payload) => listener(payload),
             (listener, listenerActive) => {
                 cache.forEach((payload) => {
-                    if (listenerActive()) {
+                    if (alive && listenerActive()) {
                         listener(payload);
                     }
                 });

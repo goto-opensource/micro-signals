@@ -63,50 +63,6 @@ export function filteredSuite(
         t.end();
     });
 
-    test(`${prefix} removing a listener should prevent further updates`, (t) => {
-        const receivedPayloads1: string[] = [];
-        const receivedPayloads2: string[] = [];
-        const receivedPayloads3: string[] = [];
-        const addOncePayloads: string[] = [];
-
-        const signal = new Signal<string>();
-        const filteredSignal = createFilteredSignal(signal, (payload) => payload === 'a');
-
-        const listener1 = (payload: string) => {
-            receivedPayloads1.push(payload);
-        };
-        filteredSignal.add(listener1);
-
-        const listener2 = (payload: string) => {
-            receivedPayloads2.push(payload);
-        };
-        filteredSignal.add(listener2);
-
-        const listener3 = (payload: string) => {
-            receivedPayloads3.push(payload);
-        };
-        filteredSignal.add(listener3);
-
-        const addOnceListener = (payload: string) => {
-            addOncePayloads.push(payload);
-        };
-        filteredSignal.addOnce(addOnceListener);
-
-        filteredSignal.remove(addOnceListener);
-        filteredSignal.remove(listener1);
-        signal.dispatch('a');
-        filteredSignal.remove(listener2);
-        signal.dispatch('a');
-        filteredSignal.remove(listener3);
-
-        t.deepEqual(receivedPayloads1, []);
-        t.deepEqual(receivedPayloads2, ['a']);
-        t.deepEqual(receivedPayloads3, ['a', 'a']);
-        t.deepEqual(addOncePayloads, []);
-
-        t.end();
-    });
-
     test('FilteredSignal should not leak', (t) => {
         const signal = new LeakDetectionSignal<void>();
         const filteredSignal = createFilteredSignal(signal, () => true);
