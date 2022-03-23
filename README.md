@@ -218,6 +218,30 @@ will never prevent any cleanup of the cached signal and its context. In many oth
 leaking may be negligible as well. However, if this functionality is desired, please file an issue
 or pull request against the repository.
 
+#### Signal.addFresh
+
+This lets consumers decide if they want to get cached values or only fresh values from the signal.
+We consider values as fresh if they are dispatched after the listener was attached.
+This also works for filtered or mapped signals that are spawned from an original cached signal.
+
+```ts
+import {Signal, ValueCache} from 'micro-signals';
+
+const cachedListener = (v: string) => {};
+const freshListener = (v: string) => {};
+
+const cachedSignal = new Signal<string>().cache(new ValueCache<string>());
+rootSignal.dispatch('cached');
+
+cachedSignal.add(cachedListener); // cachedListener is called with 'cached' value
+cachedSignal.addFresh(freshListener); // freshListener is not called
+
+rootSignal.dispatch('fresh');
+
+cachedSignal.add(cachedListener); // cachedListener is called with 'fresh' value
+cachedSignal.addFresh(freshListener); // freshListener is called with 'fresh' value
+```
+
 #### Signal.readOnly
 
 readOnly provides a wrapper around a signal with no dispatch method. This is primarily used to
@@ -402,7 +426,6 @@ const promise = successSignal.promisify(failureSignal);
 
 promise.then(() => console.log('success')).catch(() => console.error('failure'));
 ```
-
 ### ExtendedSignal
 
 An ExtendedSignal class is provided for the creation of a custom signal or wrapping a basic signal
