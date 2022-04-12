@@ -206,6 +206,9 @@ function convertedListenerSignal<BaseType, ExtendedType>(
     const listenerMap = new Map<Listener<ExtendedType>, Listener<BaseType>>();
     return new ExtendedSignal({
         add: (listener) => {
+            if (listenerMap.has(listener)) {
+                return;
+            }
             const newListener = isFreshListener(listener)
                 ? makeFreshListener(convertListener(listener))
                 : convertListener(listener);
