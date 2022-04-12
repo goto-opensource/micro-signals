@@ -6,6 +6,25 @@ import { LeakDetectionSignal } from '../lib/leak-detection-signal.js';
 export type CreateDerivedSignal = <T>(baseSignal: ReadableSignal<T>) => ReadableSignal<T>;
 
 export function derivedSuite(prefix: string, createDerivedSignal: CreateDerivedSignal) {
+    // test(`${prefix} listeners should be called only once when using add`, (t) => {
+    //     const signal = new LeakDetectionSignal<void>();
+    //     const derivedSignal = createDerivedSignal(signal);
+    //     let callCount = 0;
+
+    //     const listener = () => callCount++;
+
+    //     derivedSignal.add(listener);
+    //     t.equal(signal.listenerCount, 1, `add on listener ${signal.listenerCount}`);
+    //     derivedSignal.add(listener); // it's a Set(), so there is no extra listener added
+    //     t.equal(signal.listenerCount, 1, `add same listener again is a no-op ${signal.listenerCount}`);
+
+    //     signal.dispatch(undefined);
+
+    //     t.equal(callCount, 1);
+
+    //     t.end();
+    // });
+
     test(`${prefix} listener should be called only once when using addOnce and filter returns true`, (t) => {
         const signal = new Signal<string>();
         const derivedSignal = createDerivedSignal(signal);

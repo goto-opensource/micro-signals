@@ -2,6 +2,7 @@ import test from 'tape';
 
 import { ReadableSignal, Signal } from '../src/index.js';
 
+import { LeakDetectionSignal } from './lib/leak-detection-signal.js';
 import { derivedSuite } from './suites/derived-suite.js';
 import { filteredSuite } from './suites/filtered-suite.js';
 import { mappedSuite } from './suites/mapped-suite.js';
@@ -57,6 +58,23 @@ test('Signal listeners should received dispatched payloads', (t) => {
 
     t.deepEqual(receivedPayloadsListener1, sentPayloads);
     t.deepEqual(receivedPayloadsListener2, sentPayloads);
+
+    t.end();
+});
+
+test('Signal listeners should be called only once when using add', (t) => {
+    const signal = new LeakDetectionSignal<void>();
+    let callCount = 0;
+
+    const listener = () => callCount++;
+
+    signal.add(listener);
+    signal.add(listener); // it's a Set(), so there is no extra listener added
+    t.equal(signal.listenerCount, 1);
+
+    signal.dispatch(undefined);
+
+    t.equal(callCount, 1);
 
     t.end();
 });
