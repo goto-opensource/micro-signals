@@ -2,7 +2,7 @@
  * this should only compile
  */
 
-import { CollectionCache, Signal, ValueCache } from '../src/index.js';
+import { CollectionCache, ReadableSignal, Signal, ValueCache } from '../src/index.js';
 
 // hover over merged1-4 and verify that they have the same types as described in the comments above
 const signalNumber = new Signal<number>();
@@ -12,6 +12,8 @@ const readableSignalString = new Signal<string>().readOnly(); //.cache(new Value
 const cachedSignalNumber = new Signal<number>().cache();
 const cachedSignalBoolean = new Signal<boolean>().cache(new ValueCache<boolean>());
 
+const readableSignalBoolean: ReadableSignal<boolean> = cachedSignalBoolean;
+
 const collectionCachedSignalBoolean = new Signal<boolean>().cache(new CollectionCache<boolean>());
 
 // the following two lines should produce errors
@@ -20,7 +22,6 @@ const collectionCachedSignalBoolean = new Signal<boolean>().cache(new Collection
 
 // ReadableSignal<string | number>
 const merged0 = signalNumber.merge(signalString);
-
 // ReadableSignal<string | number>
 const merged1 = new Signal<string>().merge(signalNumber, signalNumber);
 
@@ -43,4 +44,4 @@ const merged5 = merged2.merge(cachedSignalBoolean);
 const merged6 = merged3.merge(collectionCachedSignalBoolean);
 
 const eat = (..._args: any[]) => void 0;
-eat(merged0, merged1, merged2, merged3, merged4, merged5, merged6);
+eat(merged0, merged1, merged2, merged3, merged4, merged5, merged6, readableSignalBoolean);
