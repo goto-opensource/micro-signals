@@ -68,7 +68,7 @@ export interface WritableSignal<T> {
     clear(): void;
 }
 
-export interface Cache<T> {
+export interface Cache<T = unknown> {
     add(payload: T): void;
     forEach(callback: (payload: T) => void): void;
 }
