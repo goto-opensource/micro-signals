@@ -21,6 +21,7 @@ export interface ReadableSignal<T> extends BaseSignal<T> {
     peek(peekaboo: (payload: T) => void): ReadableSignal<T>;
     readOnly(): ReadableSignal<T>;
 
+    cache(): CachedSignal<T, ValueCache<T>>;
     cache(cache: ValueCache<T>): CachedSignal<T, ValueCache<T>>;
     cache(cache: CollectionCache<T>): CachedSignal<T, CollectionCache<T>>;
     cache<NC extends Cache<T>>(cache: NC): CachedSignal<T, NC>;
@@ -52,6 +53,10 @@ export interface CachedSignal<T, C extends Cache<unknown> = ValueCache<T>> exten
      * @deprecated Please try to avoid caching an already cached signal.
      */
     cache<NC extends Cache<T>>(cache: NC): CachedSignal<T, NC>;
+    /**
+     * @deprecated Please try to avoid caching an already cached signal.
+     */
+    cache(): CachedSignal<T, ValueCache<T>>;
     reduce<U>(accumulator: Accumulator<T, U>, initialValue: U): CachedSignal<U, C>;
 }
 

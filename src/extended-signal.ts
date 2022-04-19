@@ -175,8 +175,9 @@ export class ExtendedSignal<T> implements ReadableSignal<T> {
      */
     public cache(cache: ValueCache<T>): CachedSignal<T, ValueCache<T>>;
     public cache(cache: CollectionCache<T>): CachedSignal<T, CollectionCache<T>>;
+    public cache(): CachedSignal<T, ValueCache<T>>;
     public cache<NC extends Cache<T>>(cache: NC): CachedSignal<T, NC>;
-    public cache<NC extends Cache<T>>(cache: NC): CachedSignal<T, NC> {
+    public cache(cache: Cache<T> = new ValueCache()): CachedSignal<any, any> {
         let alive = true;
         const writeToCache = (payload: T) => cache.add(payload);
         this._baseSignal.add(writeToCache);

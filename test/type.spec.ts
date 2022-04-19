@@ -9,7 +9,7 @@ const signalNumber = new Signal<number>();
 const signalString = new Signal<string>();
 const readableSignalNumber = new Signal<number>().readOnly(); //.cache(new ValueCache<string>());
 const readableSignalString = new Signal<string>().readOnly(); //.cache(new ValueCache<string>());
-const cachedSignalNumber = new Signal<number>().cache(new ValueCache<number>());
+const cachedSignalNumber = new Signal<number>().cache();
 const cachedSignalBoolean = new Signal<boolean>().cache(new ValueCache<boolean>());
 
 const collectionCachedSignalBoolean = new Signal<boolean>().cache(new CollectionCache<boolean>());
