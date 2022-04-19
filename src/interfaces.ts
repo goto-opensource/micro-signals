@@ -28,7 +28,7 @@ export interface ReadableSignal<T> extends BaseSignal<T> {
     reduce<U>(accumulator: Accumulator<T, U>, initialValue: U): ReadableSignal<U>;
 }
 
-export interface CachedSignal<T, C extends Cache<unknown>> extends BaseSignal<T> {
+export interface CachedSignal<T, C extends Cache<unknown> = ValueCache<T>> extends BaseSignal<T> {
     /**
      * @internal this tag is not used anywhere,
      * it's only there so that the interfaces are not recombined by typescript,
