@@ -7,7 +7,7 @@ import { CollectionCache, ReadableSignal, Signal, ValueCache } from '../src/inde
 // hover over merged1-4 and verify that they have the same types as described in the comments above
 const signalNumber = new Signal<number>();
 const signalString = new Signal<string>();
-const readableSignalNumber = new Signal<number>().readOnly(); //.cache(new ValueCache<string>());
+const readableSignalNumber = new Signal<number>().readOnly(); //.cache(new ValueCache<number>());
 const readableSignalString = new Signal<string>().readOnly(); //.cache(new ValueCache<string>());
 const cachedSignalNumber = new Signal<number>().cache();
 const cachedSignalBoolean = new Signal<boolean>().cache(new ValueCache<boolean>());
