@@ -1,6 +1,6 @@
 import test from 'tape';
 
-import { ReadableSignal, Signal } from '../../src/index.js';
+import { ReadableSignal, Signal, timeoutSignal } from '../../src/index.js';
 import { LeakDetectionSignal } from '../lib/leak-detection-signal.js';
 
 export type PromisifyFunction = <T>(
@@ -31,6 +31,24 @@ export function promisifySuite(prefix: string, promisifyFunction: PromisifyFunct
         });
 
         rejectSignal.dispatch('foo');
+    });
+
+    test(`${prefix} created promise rejects without payload when the timeout is reached`, (t) => {
+        const resolveSignal = new Signal<string>();
+
+        promisifyFunction<string>(resolveSignal, timeoutSignal(500)).catch((reason) => {
+            t.equal(reason, undefined);
+            t.end();
+        });
+    });
+
+    test(`${prefix} created promise rejects with the payload "timeout" when the timeout is reached`, (t) => {
+        const resolveSignal = new Signal<string>();
+
+        promisifyFunction<string>(resolveSignal, timeoutSignal(500, 'timeout')).catch((reason) => {
+            t.equal(reason, 'timeout');
+            t.end();
+        });
     });
 
     test(`${prefix} should not leak given only an acceptSignal`, (t) => {
