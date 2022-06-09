@@ -26,7 +26,6 @@ function makeFreshListener<T>(listener: Listener<T>): FreshListener<T> {
 
 export class ExtendedSignal<T> implements ReadableSignal<T> {
     private _tagMap = new TagMap<T>();
-    protected _postClearHooks: Function[] = [];
 
     public static merge<U>(...signals: BaseSignal<U>[]): ReadableSignal<U> {
         const listeners = new Map<any, any>();
@@ -73,14 +72,17 @@ export class ExtendedSignal<T> implements ReadableSignal<T> {
         });
     }
 
-    constructor(private readonly _baseSignal: BaseSignal<T>) {}
+    constructor(
+        private readonly _baseSignal: BaseSignal<T>,
+        protected readonly _parentPostClearHooks: Function[] = []
+    ) {}
 
     public add(listener: Listener<T>, ...tags: any[]): void {
         this._tagMap.setListeners(listener, ...tags);
         this._baseSignal.add(listener);
     }
 
-    public remove(listenerOrTag: any): void {
+    public remove(listenerOrTag: any) {
         this._tagMap.getListeners(listenerOrTag).forEach((taggedListener) => {
             this._baseSignal.remove(taggedListener);
             this._tagMap.clearListener(taggedListener);
@@ -120,17 +122,22 @@ export class ExtendedSignal<T> implements ReadableSignal<T> {
     public filter<U extends T>(filter: (payload: T) => payload is U): ReadableSignal<U>;
     public filter(filter: (payload: T) => boolean): ReadableSignal<T>;
     public filter(filter: (payload: T) => boolean): ReadableSignal<T> {
-        return convertedListenerSignal(this._baseSignal, (listener) => (payload) => {
-            if (filter(payload)) {
-                listener(payload);
-            }
-        });
+        return convertedListenerSignal(
+            this._baseSignal,
+            (listener) => (payload) => {
+                if (filter(payload)) {
+                    listener(payload);
+                }
+            },
+            { parentPostClearHooks: this._parentPostClearHooks }
+        );
     }
 
     public map<U>(transform: (payload: T) => U): ReadableSignal<U> {
         return convertedListenerSignal(
             this._baseSignal,
-            (listener) => (payload) => listener(transform(payload))
+            (listener) => (payload) => listener(transform(payload)),
+            { parentPostClearHooks: this._parentPostClearHooks }
         );
     }
 
@@ -147,27 +154,35 @@ export class ExtendedSignal<T> implements ReadableSignal<T> {
     public readOnly(): ReadableSignal<T> {
         return convertedListenerSignal(
             this._baseSignal,
-            (listener) => (payload) => listener(payload)
+            (listener) => (payload) => listener(payload),
+            { parentPostClearHooks: this._parentPostClearHooks }
         );
     }
 
     public reduce<U>(accumulator: Accumulator<T, U>, initialValue: U): ReadableSignal<U> {
-        return convertedListenerSignal(this._baseSignal, (listener) =>
-            (() => {
-                let accumulated = initialValue;
-                return (payload: T) => {
-                    accumulated = accumulator(accumulated, payload);
-                    listener(accumulated);
-                };
-            })()
+        return convertedListenerSignal(
+            this._baseSignal,
+            (listener) =>
+                (() => {
+                    let accumulated = initialValue;
+                    return (payload: T) => {
+                        accumulated = accumulator(accumulated, payload);
+                        listener(accumulated);
+                    };
+                })(),
+            { parentPostClearHooks: this._parentPostClearHooks }
         );
     }
 
     public peek(peekaboo: (payload: T) => void): ReadableSignal<T> {
-        return convertedListenerSignal(this._baseSignal, (listener) => (payload) => {
-            peekaboo(payload);
-            listener(payload);
-        });
+        return convertedListenerSignal(
+            this._baseSignal,
+            (listener) => (payload) => {
+                peekaboo(payload);
+                listener(payload);
+            },
+            { parentPostClearHooks: this._parentPostClearHooks }
+        );
     }
 
     /**
@@ -181,26 +196,36 @@ export class ExtendedSignal<T> implements ReadableSignal<T> {
         let alive = true;
         const writeToCache = (payload: T) => cache.add(payload);
         this._baseSignal.add(writeToCache);
-        this._postClearHooks.push(() => {
+
+        const postClearHook = (): void => {
             alive = false;
             this._baseSignal.remove(writeToCache);
-        });
+        };
+        this._parentPostClearHooks.push(postClearHook);
 
         return convertedListenerSignal(
             this._baseSignal,
             (listener) => (payload) => listener(payload),
-            (listener, listenerActive) => {
-                if (!isFreshListener(listener)) {
-                    cache.forEach((payload) => {
-                        if (alive && listenerActive()) {
-                            listener(payload);
-                        }
-                    });
-                }
+            {
+                postAddHook: (listener, listenerActive) => {
+                    if (!isFreshListener(listener)) {
+                        cache.forEach((payload) => {
+                            if (alive && listenerActive()) {
+                                listener(payload);
+                            }
+                        });
+                    }
+                },
+                parentPostClearHooks: this._parentPostClearHooks,
             }
         );
     }
 }
+
+type ExtendedSignalConfig<T> = {
+    parentPostClearHooks: Function[];
+    postAddHook?: (listener: Listener<T>, listenerActive: () => boolean) => void;
+};
 
 /**
  * Provides a new signal, with its own set of listeners, and the ability to transform listeners that
@@ -209,40 +234,44 @@ export class ExtendedSignal<T> implements ReadableSignal<T> {
 function convertedListenerSignal<P, T, C extends Cache<T>>(
     baseSignal: BaseSignal<P>,
     convertListener: (listener: Listener<T>) => Listener<P>,
-    postAddHook?: (listener: Listener<T>, listenerActive: () => boolean) => void
+    config: ExtendedSignalConfig<T>
 ): CachedSignal<T, C>;
+
 function convertedListenerSignal<P, T>(
     baseSignal: BaseSignal<P>,
     convertListener: (listener: Listener<T>) => Listener<P>,
-    postAddHook?: (listener: Listener<T>, listenerActive: () => boolean) => void
+    config: ExtendedSignalConfig<T>
 ): ReadableSignal<T>;
+
 function convertedListenerSignal<P, T>(
     baseSignal: BaseSignal<P>,
     convertListener: (listener: Listener<T>) => Listener<P>,
-    postAddHook?: (listener: Listener<T>, listenerActive: () => boolean) => void
+    config: ExtendedSignalConfig<T>
 ): ReadableSignal<T> {
     const listenerMap = new Map<Listener<T>, Listener<P>>();
-    return new ExtendedSignal({
-        add: (listener) => {
-            if (listenerMap.has(listener)) {
-                return;
-            }
-            const newListener = isFreshListener(listener)
-                ? makeFreshListener(convertListener(listener))
-                : convertListener(listener);
-            listenerMap.set(listener, newListener);
-            baseSignal.add(newListener);
-            if (postAddHook) {
-                postAddHook(listener, () => listenerMap.has(listener));
-            }
+    const { postAddHook, parentPostClearHooks: postClearHooks } = config;
+
+    return new ExtendedSignal(
+        {
+            add: (listener) => {
+                if (listenerMap.has(listener)) {
+                    return;
+                }
+                const newListener = isFreshListener(listener)
+                    ? makeFreshListener(convertListener(listener))
+                    : convertListener(listener);
+                listenerMap.set(listener, newListener);
+                baseSignal.add(newListener);
+                if (postAddHook) {
+                    postAddHook(listener, () => listenerMap.has(listener));
+                }
+            },
+            remove: (listener) => {
+                const newListener = listenerMap.get(listener);
+                listenerMap.delete(listener);
+                return baseSignal.remove(newListener);
+            },
         },
-        remove: (listener) => {
-            const newListener = listenerMap.get(listener);
-            listenerMap.delete(listener);
-            // TODO undefined ok in other case
-            if (newListener !== undefined) {
-                baseSignal.remove(newListener);
-            }
-        },
-    });
+        postClearHooks
+    );
 }

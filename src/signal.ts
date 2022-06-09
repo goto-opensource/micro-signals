@@ -39,8 +39,9 @@ export class Signal<T> extends ExtendedSignal<T> implements WritableSignal<T>, R
     }
 
     public clear() {
+        this._parentPostClearHooks.forEach((hook) => hook());
+        this._parentPostClearHooks.length = 0;
         this._listeners = new Set();
-        this._postClearHooks.forEach((hook) => hook());
     }
 
     private _instanceDefaultListener: Listener<T> = (payload) =>
