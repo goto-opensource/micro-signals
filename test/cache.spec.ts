@@ -166,6 +166,23 @@ test(`Signal#cache subscribers don't get cache after clearing`, (t) => {
     t.end();
 });
 
+test(`Signal#cache subscribers of derived Signals don't get cache after clearing`, (t) => {
+    const signal = new Signal<number>();
+    const cached = signal.readOnly().cache(new CollectionCache<number>());
+
+    const dispatchedValues: number[] = [];
+    const tooLateSubscriber = (value: number) => dispatchedValues.push(value + 100);
+
+    [1, 2, 3, 4, 5].forEach((value) => signal.dispatch(value));
+
+    signal.clear();
+
+    cached.add(tooLateSubscriber);
+
+    t.deepEqual(dispatchedValues, []);
+    t.end();
+});
+
 test(`Signal#cache new caches can be created after clearing`, (t) => {
     const signal = new Signal<number>();
 
