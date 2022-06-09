@@ -122,23 +122,23 @@ export class ExtendedSignal<T> implements ReadableSignal<T> {
     public filter<U extends T>(filter: (payload: T) => payload is U): ReadableSignal<U>;
     public filter(filter: (payload: T) => boolean): ReadableSignal<T>;
     public filter(filter: (payload: T) => boolean): ReadableSignal<T> {
-        return convertedListenerSignal(
-            this._baseSignal,
-            (listener) => (payload) => {
+        return convertedListenerSignal({
+            baseSignal: this._baseSignal,
+            convertListener: (listener) => (payload) => {
                 if (filter(payload)) {
                     listener(payload);
                 }
             },
-            { parentPostClearHooks: this._parentPostClearHooks }
-        );
+            parentPostClearHooks: this._parentPostClearHooks,
+        });
     }
 
     public map<U>(transform: (payload: T) => U): ReadableSignal<U> {
-        return convertedListenerSignal(
-            this._baseSignal,
-            (listener) => (payload) => listener(transform(payload)),
-            { parentPostClearHooks: this._parentPostClearHooks }
-        );
+        return convertedListenerSignal({
+            baseSignal: this._baseSignal,
+            convertListener: (listener) => (payload) => listener(transform(payload)),
+            parentPostClearHooks: this._parentPostClearHooks,
+        });
     }
 
     public merge<U, C extends Cache<unknown>>(...s: CachedSignal<U, C>[]): CachedSignal<T | U, C>;
@@ -152,17 +152,17 @@ export class ExtendedSignal<T> implements ReadableSignal<T> {
     }
 
     public readOnly(): ReadableSignal<T> {
-        return convertedListenerSignal(
-            this._baseSignal,
-            (listener) => (payload) => listener(payload),
-            { parentPostClearHooks: this._parentPostClearHooks }
-        );
+        return convertedListenerSignal({
+            baseSignal: this._baseSignal,
+            convertListener: (listener) => (payload) => listener(payload),
+            parentPostClearHooks: this._parentPostClearHooks,
+        });
     }
 
     public reduce<U>(accumulator: Accumulator<T, U>, initialValue: U): ReadableSignal<U> {
-        return convertedListenerSignal(
-            this._baseSignal,
-            (listener) =>
+        return convertedListenerSignal({
+            baseSignal: this._baseSignal,
+            convertListener: (listener) =>
                 (() => {
                     let accumulated = initialValue;
                     return (payload: T) => {
@@ -170,19 +170,19 @@ export class ExtendedSignal<T> implements ReadableSignal<T> {
                         listener(accumulated);
                     };
                 })(),
-            { parentPostClearHooks: this._parentPostClearHooks }
-        );
+            parentPostClearHooks: this._parentPostClearHooks,
+        });
     }
 
     public peek(peekaboo: (payload: T) => void): ReadableSignal<T> {
-        return convertedListenerSignal(
-            this._baseSignal,
-            (listener) => (payload) => {
+        return convertedListenerSignal({
+            baseSignal: this._baseSignal,
+            convertListener: (listener) => (payload) => {
                 peekaboo(payload);
                 listener(payload);
             },
-            { parentPostClearHooks: this._parentPostClearHooks }
-        );
+            parentPostClearHooks: this._parentPostClearHooks,
+        });
     }
 
     /**
@@ -203,26 +203,26 @@ export class ExtendedSignal<T> implements ReadableSignal<T> {
         };
         this._parentPostClearHooks.push(postClearHook);
 
-        return convertedListenerSignal(
-            this._baseSignal,
-            (listener) => (payload) => listener(payload),
-            {
-                postAddHook: (listener, listenerActive) => {
-                    if (!isFreshListener(listener)) {
-                        cache.forEach((payload) => {
-                            if (alive && listenerActive()) {
-                                listener(payload);
-                            }
-                        });
-                    }
-                },
-                parentPostClearHooks: this._parentPostClearHooks,
-            }
-        );
+        return convertedListenerSignal({
+            baseSignal: this._baseSignal,
+            convertListener: (listener) => (payload) => listener(payload),
+            postAddHook: (listener, listenerActive) => {
+                if (!isFreshListener(listener)) {
+                    cache.forEach((payload) => {
+                        if (alive && listenerActive()) {
+                            listener(payload);
+                        }
+                    });
+                }
+            },
+            parentPostClearHooks: this._parentPostClearHooks,
+        });
     }
 }
 
-type ExtendedSignalConfig<T> = {
+type ExtendedSignalConfig<P, T> = {
+    baseSignal: BaseSignal<P>;
+    convertListener: (listener: Listener<T>) => Listener<P>;
     parentPostClearHooks: Function[];
     postAddHook?: (listener: Listener<T>, listenerActive: () => boolean) => void;
 };
@@ -232,24 +232,18 @@ type ExtendedSignalConfig<T> = {
  * are added to the new signal.
  */
 function convertedListenerSignal<P, T, C extends Cache<T>>(
-    baseSignal: BaseSignal<P>,
-    convertListener: (listener: Listener<T>) => Listener<P>,
-    config: ExtendedSignalConfig<T>
+    config: ExtendedSignalConfig<P, T>
 ): CachedSignal<T, C>;
 
-function convertedListenerSignal<P, T>(
-    baseSignal: BaseSignal<P>,
-    convertListener: (listener: Listener<T>) => Listener<P>,
-    config: ExtendedSignalConfig<T>
-): ReadableSignal<T>;
-
-function convertedListenerSignal<P, T>(
-    baseSignal: BaseSignal<P>,
-    convertListener: (listener: Listener<T>) => Listener<P>,
-    config: ExtendedSignalConfig<T>
-): ReadableSignal<T> {
+function convertedListenerSignal<P, T>(config: ExtendedSignalConfig<P, T>): ReadableSignal<T>;
+function convertedListenerSignal<P, T>(config: ExtendedSignalConfig<P, T>): ReadableSignal<T> {
     const listenerMap = new Map<Listener<T>, Listener<P>>();
-    const { postAddHook, parentPostClearHooks: postClearHooks } = config;
+    const {
+        baseSignal,
+        convertListener,
+        postAddHook,
+        parentPostClearHooks: postClearHooks,
+    } = config;
 
     return new ExtendedSignal(
         {
