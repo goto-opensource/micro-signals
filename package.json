@@ -2,9 +2,12 @@
   "name": "@goto/micro-signals",
   "version": "2.9.0",
   "description": "A tiny typed messaging system inspired by js-signals that uses ES2015 sets",
-  "main": "./lib/src/index.js",
-  "module": "./lib/src/index.js",
-  "exports": "./lib/src/index.js",
+  "main": "lib/src/index.js",
+  "module": "lib/src/index.js",
+  "exports": {
+    ".": "./lib/src/index.js",
+    "./package.json": "./package.json"
+  },
   "types": "lib/src/index.d.ts",
   "type": "module",
   "devDependencies": {
