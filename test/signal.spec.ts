@@ -274,3 +274,23 @@ test('does not dispatch to static default listener when other listeners have bee
     t.equal(instanceCalls.length, 0);
     t.end();
 });
+
+test('merged + promisify dispatches with the first dispatched signal only', async (t) => {
+    const a = new LeakDetectionSignal<string>();
+    const b = new LeakDetectionSignal<number>();
+    const c = new LeakDetectionSignal<{ object: 'yes' }>();
+
+    const merged = Signal.merge<number | string | { object: 'yes' }>(a, b, c);
+    const signalPromise = merged.promisify();
+
+    a.dispatch('foobar');
+    b.dispatch(Infinity);
+    c.dispatch({ object: 'yes' });
+
+    t.equal('foobar', await signalPromise);
+    t.equal(b.listenerCount, 0);
+    t.equal(a.listenerCount, 0);
+    t.equal(c.listenerCount, 0);
+
+    t.end();
+});
