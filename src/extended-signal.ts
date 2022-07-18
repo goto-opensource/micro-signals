@@ -116,7 +116,8 @@ export class ExtendedSignal<T> implements ReadableSignal<T> {
 
     public addFresh(listener: Listener<T>, ...tags: any[]): void {
         const freshListener = makeFreshListener((payload: T) => listener(payload));
-        this._baseSignal.add(freshListener, ...tags);
+        this._tagMap.setListeners(freshListener, ...tags, listener);
+        this._baseSignal.add(freshListener, listener);
     }
 
     public filter<U extends T>(filter: (payload: T) => payload is U): ReadableSignal<U>;
