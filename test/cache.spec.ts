@@ -149,6 +149,20 @@ test('Signal#cache adding a FreshListener to a derived signal should NOT receive
     t.end();
 });
 
+test('Signal#cache removed FreshListeners should NOT receive future payloads', (t) => {
+    const signal = new Signal<string>();
+    const receivedPayloads: string[] = [];
+
+    const cachedSignal = signal.cache();
+    const listener = (payload: string) => receivedPayloads.push(payload);
+    cachedSignal.addFresh(listener);
+    cachedSignal.remove(listener);
+
+    signal.dispatch('one');
+    t.deepEqual(receivedPayloads, [], 'did not receive anything');
+    t.end();
+});
+
 test(`Signal#cache subscribers don't get cache after clearing`, (t) => {
     const signal = new Signal<number>();
     const cached = signal.cache(new CollectionCache<number>());
