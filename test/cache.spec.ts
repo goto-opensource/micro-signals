@@ -1,5 +1,6 @@
 import test from 'tape';
 
+import { GroupingCache, CapacityCollectionCache } from '../src/caches.js';
 // eslint-disable-next-line @typescript-eslint/no-shadow
 import { Cache, CollectionCache, Signal, ValueCache } from '../src/index.js';
 
@@ -253,6 +254,23 @@ test(`cache is cleared with the signal`, (t) => {
     t.end();
 });
 
-cacheSuite(ValueCache, (arr) => arr.slice(-1));
+cacheSuite(
+    () => new ValueCache(),
+    (arr) => arr.slice(-1)
+);
 
-cacheSuite(CollectionCache, (arr) => arr);
+cacheSuite(
+    () => new CollectionCache(),
+    (arr) => arr
+);
+
+cacheSuite(
+    () => new CapacityCollectionCache(100),
+    (arr) => arr
+);
+
+cacheSuite(
+    // FIXME: NOOO!
+    () => new GroupingCache((_payload) => Math.random() as any),
+    (arr) => arr
+);

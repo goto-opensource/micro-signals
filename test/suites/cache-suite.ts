@@ -1,16 +1,14 @@
 import test from 'tape';
 
+// eslint-disable-next-line @typescript-eslint/no-shadow
 import { Cache } from '../../src/index.js';
 import { LeakDetectionSignal } from '../lib/leak-detection-signal.js';
 
-export function cacheSuite(
-    cacheClass: { new <T>(): Cache<T> },
-    expected: <T>(testCase: T[]) => T[]
-) {
+export function cacheSuite(cacheClass: { <T>(): Cache<T> }, expected: <T>(testCase: T[]) => T[]) {
     const cacheName = cacheClass.name;
 
     test(`${cacheName} call forEach callback if add has not been called`, (t) => {
-        const cache = new cacheClass();
+        const cache = cacheClass();
         let hasValue = false;
         cache.forEach(() => (hasValue = true));
         t.false(hasValue);
@@ -19,7 +17,7 @@ export function cacheSuite(
 
     function testCacheWithValues<T>(testDescription: string, testValues: T[]) {
         test(testDescription, (t) => {
-            const cache = new cacheClass<T>();
+            const cache = cacheClass<T>();
             const cachedValues: T[] = [];
 
             testValues.forEach((value) => cache.add(value));
@@ -58,7 +56,7 @@ export function cacheSuite(
     test(`${cacheName} cached signal should not leak`, (t) => {
         const signal = new LeakDetectionSignal<void>();
         t.equal(signal.listenerCount, 0, 'start with 0 listeners');
-        const cachedSignal = signal.cache(new cacheClass<void>());
+        const cachedSignal = signal.cache(cacheClass<void>());
         t.equal(signal.listenerCount, 1, 'has one listener after caching');
 
         const listener = () => {
