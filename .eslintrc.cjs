@@ -19,13 +19,11 @@ module.exports = {
     parser: '@typescript-eslint/parser',
     parserOptions: {
         sourceType: 'module',
-        ecmaVersion: 2017,
+        ecmaVersion: 2018,
     },
     plugins: ['@typescript-eslint', 'mocha', 'simple-import-sort', 'import'],
     rules: {
-        '@typescript-eslint/ban-ts-ignore': ['off'],
         '@typescript-eslint/ban-types': ['off'],
-        '@typescript-eslint/explicit-function-return-type': ['off'],
         '@typescript-eslint/explicit-member-accessibility': [
             'warn',
             {
@@ -35,7 +33,6 @@ module.exports = {
                 },
             },
         ],
-        '@typescript-eslint/explicit-module-boundary-types': ['off'],
         '@typescript-eslint/member-ordering': [
             'warn',
             {
@@ -93,7 +90,6 @@ module.exports = {
                 hoist: 'all',
             },
         ],
-        '@typescript-eslint/no-this-alias': ['off'],
         '@typescript-eslint/no-unused-vars': [
             'warn',
             {
@@ -113,11 +109,8 @@ module.exports = {
         ],
         indent: 0,
         semi: ['warn', 'always'],
-        'mocha/no-exclusive-tests': 'warn',
-        'no-shadow': 'off',
+        'mocha/no-exclusive-tests': 'error',
         'no-template-curly-in-string': 'warn',
-        'no-unused-vars': 'off',
-        'prefer-spread': 'off',
         'prettier/prettier': [
             'warn',
             {
@@ -132,7 +125,6 @@ module.exports = {
                 tabWidth: 4,
             },
         ],
-        'require-atomic-updates': 'off',
         'simple-import-sort/imports': [
             'warn',
             {
