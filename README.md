@@ -218,6 +218,31 @@ will never prevent any cleanup of the cached signal and its context. In many oth
 leaking may be negligible as well. However, if this functionality is desired, please file an issue
 or pull request against the repository.
 
+#### Signal.chain
+
+In case you do require to retain the ability to clean the `Cache` of a base signal you do not have access to,
+you can chain the original Signal with a new one using `.chain()`. Now you can add the cache to the new
+Signal and clear it individually. Like so:
+
+```ts
+const toggleState = new ToggleState();
+
+const mySignal = new Signal();
+const myCachedSignal = mySignal.cache(new CollectionCache());
+
+toggleState.setState(false);
+toggleState.stateChanged.chain(mySignal); // mySignal will be dispatched with previous payloads
+toggleState.setState(true);
+toggleState.setState(false);
+
+// myCachedSignal now contains three values
+myCachedSignal.add(console.log);
+
+mySignal.clear(); // clearing mySignal and myCachedSignal without affecting toggleState
+
+
+```
+
 #### Signal.addFresh
 
 This lets consumers decide if they want to get cached values or only fresh values from the signal.
