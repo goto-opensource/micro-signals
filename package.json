@@ -5,8 +5,7 @@
   "main": "lib/src/index.js",
   "module": "lib/src/index.js",
   "exports": {
-    ".": "./lib/src/index.js",
-    "./package.json": "./package.json"
+    ".": "./lib/src/index.js"
   },
   "types": "lib/src/index.d.ts",
   "type": "module",
