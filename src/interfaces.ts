@@ -209,6 +209,7 @@ export interface WritableSignal<T> {
 export interface Cache<T = unknown> {
     add(payload: T): void;
     forEach(callback: (payload: T) => void): void;
+    clear?(): void;
 }
 
 export type Accumulator<T, U> = (accumulator: U, current: T) => any;
