@@ -194,13 +194,12 @@ export class ExtendedSignal<T> implements ReadableSignal<T> {
     public cache(): CachedSignal<T, ValueCache<T>>;
     public cache<NC extends Cache<T>>(cache: NC): CachedSignal<T, NC>;
     public cache(cache: Cache<T> = new ValueCache()): CachedSignal<any, any> {
-        let alive = true;
         const writeToCache = (payload: T) => cache.add(payload);
         this._baseSignal.add(writeToCache);
 
         const postClearHook = (): void => {
-            alive = false;
             this._baseSignal.remove(writeToCache);
+            cache.clear?.();
         };
         this._parentPostClearHooks.push(postClearHook);
 
@@ -210,7 +209,7 @@ export class ExtendedSignal<T> implements ReadableSignal<T> {
             postAddHook: (listener, listenerActive) => {
                 if (!isFreshListener(listener)) {
                     cache.forEach((payload) => {
-                        if (alive && listenerActive()) {
+                        if (listenerActive()) {
                             listener(payload);
                         }
                     });
