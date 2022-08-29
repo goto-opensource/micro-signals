@@ -229,6 +229,30 @@ test(`Signal#cache new caches can be created after clearing`, (t) => {
     t.end();
 });
 
+test(`cache is cleared with the signal`, (t) => {
+    const signal = new Signal<number>();
+
+    const dispatchedValues: number[] = [];
+    const dispatchedValues2: number[] = [];
+
+    const lateSubscriber = (value: number) => dispatchedValues.push(value + 10);
+    const lateSubscriber2 = (value: number) => dispatchedValues2.push(value + 10);
+    const cache = new CollectionCache<number>();
+    const cached = signal.cache(cache);
+
+    [6, 7, 8, 9, 0].forEach((value) => signal.dispatch(value));
+    cached.add(lateSubscriber);
+    signal.clear();
+
+    const cachedValues: number[] = [];
+    cache.forEach((value) => cachedValues.push(value));
+
+    cached.add(lateSubscriber2);
+
+    t.deepEqual(cachedValues, [], 'cache should be empty');
+    t.end();
+});
+
 cacheSuite(ValueCache, (arr) => arr.slice(-1));
 
 cacheSuite(CollectionCache, (arr) => arr);
