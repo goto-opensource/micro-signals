@@ -1,6 +1,6 @@
 import test from 'tape';
 
-import { ReadableSignal, Signal, timeoutSignal } from '../../src/index.js';
+import { errorSignal, ReadableSignal, Signal, timeoutSignal } from '../../src/index.js';
 import { LeakDetectionSignal } from '../lib/leak-detection-signal.js';
 
 export type PromisifyFunction = <T>(
@@ -47,6 +47,18 @@ export function promisifySuite(prefix: string, promisifyFunction: PromisifyFunct
 
         promisifyFunction<string>(resolveSignal, timeoutSignal(500, 'timeout')).catch((reason) => {
             t.equal(reason, 'timeout');
+            t.end();
+        });
+    });
+
+    test(`${prefix} created promise rejects with Error when the timeout is reached`, (t) => {
+        const resolveSignal = new Signal<string>();
+
+        promisifyFunction<string>(
+            resolveSignal,
+            errorSignal(500, () => new Error('timeout'))
+        ).catch((reason: Error) => {
+            t.equal(reason.message, 'timeout');
             t.end();
         });
     });
