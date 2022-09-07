@@ -21,7 +21,7 @@ export const timeoutSignal = <T = void>(timeout = 1000, payload?: T): ReadableSi
  * since the payload of the rejectSignal is actually thrown
  * and some runtimes complain if you don't throw an `Error` instance.
  * @param timeout number of milliseconds after which to dispatch
- * @param errorProducer creates a the error that the signal will dispatch
+ * @param errorProducer creates the error that the signal will dispatch
  * @returns ReadableSignal<Error>
  */
 export const errorSignal = (timeout = 1000, errorProducer: () => Error): ReadableSignal<Error> => {
