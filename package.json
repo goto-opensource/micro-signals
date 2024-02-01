@@ -1,5 +1,5 @@
 {
-  "name": "micro-signals",
+  "name": "@goto/micro-signals",
   "version": "2.4.0",
   "description": "A tiny typed messaging system inspired by js-signals that uses ES2015 sets",
   "main": "lib/index.js",
@@ -23,10 +23,6 @@
     "prepublishOnly": "yarn && yarn test && yarn build",
     "postpublish": "echo \"Do not forget to push the version commit and tag! `git push --follow-tags`\""
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/lelandmiller/micro-signals.git"
-  },
   "keywords": [
     "signals",
     "signal",
@@ -39,13 +35,9 @@
     "messaging",
     "pubsub"
   ],
-  "author": "Leland Miller <lelandmiller@gmail.com>",
   "license": "MIT",
-  "contributors": [
+  "authors": [
+    "Leland Miller <lelandmiller@gmail.com>",
     "Justin Maher <justin.m.maher@gmail.com>"
-  ],
-  "bugs": {
-    "url": "https://github.com/lelandmiller/micro-signals/issues"
-  },
-  "homepage": "https://github.com/lelandmiller/micro-signals#readme"
+  ]
 }
