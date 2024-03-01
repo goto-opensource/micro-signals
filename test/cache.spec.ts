@@ -1,6 +1,6 @@
 import test from 'tape';
 
-import { GroupingCache, CapacityCollectionCache } from '../src/caches.js';
+import { CapacityCollectionCache, GroupingCache } from '../src/caches.js';
 // eslint-disable-next-line @typescript-eslint/no-shadow
 import { Cache, CollectionCache, Signal, ValueCache } from '../src/index.js';
 

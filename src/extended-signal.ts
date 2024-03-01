@@ -25,7 +25,7 @@ function makeFreshListener<T>(listener: Listener<T>): FreshListener<T> {
 }
 
 export class ExtendedSignal<T> implements ReadableSignal<T> {
-    private _tagMap = new TagMap<T>();
+    private readonly _tagMap = new TagMap<T>();
 
     public static merge<U>(...signals: BaseSignal<U>[]): ReadableSignal<U> {
         const listeners = new Map<any, any>();
