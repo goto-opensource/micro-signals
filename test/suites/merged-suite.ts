@@ -1,6 +1,6 @@
 import test from 'tape';
 
-import { ReadableSignal, Signal, ValueCache } from '../../src/index.js';
+import { ReadableSignal, Signal } from '../../src/index.js';
 import { LeakDetectionSignal } from '../lib/leak-detection-signal.js';
 
 import { parentChildSuite } from './parent-child-suite.js';

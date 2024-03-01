@@ -227,7 +227,7 @@ test('dispatches to static default listener if no instance default listener is s
     Signal.setDefaultListener(staticDefaultListener);
     const s = new Signal<number>();
     s.dispatch(1);
-    t.equal(staticCalls[0][0], 1);
+    t.equal(staticCalls[0]![0], 1);
     t.end();
 });
 
@@ -241,7 +241,7 @@ test('dispatches to instance default listener when it is set', (t) => {
     s.setDefaultListener(instanceDefaultListener);
     s.dispatch(1);
     t.equal(staticCalls.length, 0);
-    t.equal(instanceCalls[0][0], 1);
+    t.equal(instanceCalls[0]![0], 1);
     t.end();
 });
 
