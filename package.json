@@ -1,6 +1,6 @@
 {
   "name": "@goto/micro-signals",
-  "version": "2.5.1",
+  "version": "2.6.0",
   "description": "A tiny typed messaging system inspired by js-signals that uses ES2015 sets",
   "main": "lib/src/index.js",
   "types": "lib/src/index.d.ts",
